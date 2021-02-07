@@ -153,20 +153,24 @@ class Busca:
         fila = queue.Queue()
         fila.put(copy.deepcopy(self.tabuleiro.tabuleiro))
         while not fila.empty():
-            self.tabuleiro.setTabuleiro(fila.get())
-            pos = self.proxPos(self.tabuleiro.tabuleiro)
-            # Verifica se é válido
-            if not pos:
-                continue
-            # Varre possíveis valores
-            for n in range(1, 7):
-                # Verifica se existe
-                if not self.existe(self.tabuleiro.tabuleiro, n, pos):
-                    # Seta valor
-                    self.tabuleiro.setCampo(n, (pos[0], pos[1]))
-                    self.tabuleiro.tabuleiro[pos[0]][pos[1]] = n
-                    fila.put(copy.deepcopy(self.tabuleiro.tabuleiro))
-                    time.sleep(self.__delay)
+            if not self.__kill:
+                self.tabuleiro.setTabuleiro(fila.get())
+                pos = self.proxPos(self.tabuleiro.tabuleiro)
+                # Verifica se é válido
+                if not pos:
+                    continue
+                # Varre possíveis valores
+                for n in range(1, 7):
+                    # Verifica se existe
+                    if not self.existe(self.tabuleiro.tabuleiro, n, pos):
+                        # Seta valor
+                        self.tabuleiro.setCampo(n, (pos[0], pos[1]))
+                        self.tabuleiro.tabuleiro[pos[0]][pos[1]] = n
+                        fila.put(copy.deepcopy(self.tabuleiro.tabuleiro))
+                        time.sleep(self.__delay)
+            else:
+                fila = queue.Queue()
+                break   
         self.__e.clear()
 
     def gulosa(self) -> bool:

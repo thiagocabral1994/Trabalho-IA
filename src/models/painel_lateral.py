@@ -69,7 +69,7 @@ class AutoBusca(GUIBase):
         self.__botoes = [
             Botao(*i, tamanhoControle, self.tela)
             for i in (
-                # (self.iniciar_backtracking, (), (-14, 8), "backtracking", 10, (30, 120)),
+                #(self.iniciar_backtracking, (), (-14, 8), "backtracking", 10, (30, 120)),
                 (self.iniciar_largura, (), (-11, 4), "largura", 16, (30, 120)),
                 (self.iniciar_gulosa, (), (-8, 4), "gulosa", 16, (110, 120)),
                 (self.iniciar_IDA_estrela, (), (5, 4), "IDA*", 16, (30, 170)),
