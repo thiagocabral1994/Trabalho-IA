@@ -57,6 +57,28 @@ class Tabuleiro(GUIBase):
         """getTabuleiro()"""
         return self.__tabuleiro
 
+    def setTabuleiro(self, tabuleiro: list):
+        """setTabuleiro(list)
+    
+        :param tabuleiro: matriz com os valores do tabuleiro da lógica grega
+        :type tabuleiro: list
+        """
+        self.__tabuleiro = tabuleiro
+        # reinicia os campos
+        self.__campos = [
+            [
+                Campo(
+                    self.__tabuleiro[col][lin],
+                    (lin, col),
+                    (self.tamanho[0], self.tamanho[2]),
+                    self.tela,
+                    self.__campos[col][lin].alteravel,
+                )
+                for lin in range(6)
+            ]
+            for col in range(6)
+        ]
+    
     @tabuleiro.setter
     def tabuleiro(self, tabuleiro: list):
         """setTabuleiro(list)

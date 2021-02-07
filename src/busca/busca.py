@@ -128,18 +128,19 @@ class Busca:
             # retorna solução inválida
             return False
 
-    def largura(self) -> bool:
+    def largura(self):
         """Resolve a Lógica Grega por Busca em Largura
 
         :returns: True se solucionou e False se não tem solução
-        :rtype: bool
         """
         fila = queue.Queue()
         fila.put(copy.deepcopy(self.tabuleiro.tabuleiro))
         while not fila.empty():
-            self.tabuleiro.tabuleiro = fila.get()
+            self.tabuleiro.setTabuleiro(fila.get())
             pos = self.proxPos(self.tabuleiro.tabuleiro)
-            
+            # Verifica se é válido
+            if not pos:
+                continue
             # Varre possíveis valores
             for n in range(1, 7):
                 # Verifica se existe
@@ -149,7 +150,6 @@ class Busca:
                     self.tabuleiro.tabuleiro[pos[0]][pos[1]] = n
                     fila.put(copy.deepcopy(self.tabuleiro.tabuleiro))
                     time.sleep(self.__delay)
-        return True
 
     def gulosa(self) -> bool:
         # [INSERIR BUSCA GULOSA AQUI]
