@@ -6,6 +6,8 @@
 """
 import threading
 import time
+import queue
+import copy
 
 class Busca:
 
@@ -91,7 +93,7 @@ class Busca:
     def backtracking(self) -> bool:
         """Resolve a Lógica Grega por Backtracking (AutoSolver (tabuleiro state change))
 
-        :returns: True se solucionou e False se é necessário fazer backtracking
+        :returns: True se solucionou e False se não possui solução
         :rtype: bool
         """
         if not self.__kill:
@@ -114,7 +116,7 @@ class Busca:
                     # continua a próxima iteração
                     if self.backtracking():
                         return True
-                    if not self.__kill:
+                    elif not self.__kill:
                         # pausa/retoma
                         # self.__e.wait()
                         # backtracking
@@ -127,9 +129,27 @@ class Busca:
             return False
 
     def largura(self) -> bool:
-        # [INSERIR BUSCA EM LARGURA AQUI]
-        print("Soon: Busca em Largura")
-        pass
+        """Resolve a Lógica Grega por Busca em Largura
+
+        :returns: True se solucionou e False se não tem solução
+        :rtype: bool
+        """
+        fila = queue.Queue()
+        fila.put(copy.deepcopy(self.tabuleiro.tabuleiro))
+        while not fila.empty():
+            self.tabuleiro.tabuleiro = fila.get()
+            pos = self.proxPos(self.tabuleiro.tabuleiro)
+            
+            # Varre possíveis valores
+            for n in range(1, 7):
+                # Verifica se existe
+                if not self.existe(self.tabuleiro.tabuleiro, n, pos):
+                    # Seta valor
+                    self.tabuleiro.setCampo(n, (pos[0], pos[1]))
+                    self.tabuleiro.tabuleiro[pos[0]][pos[1]] = n
+                    fila.put(copy.deepcopy(self.tabuleiro.tabuleiro))
+                    time.sleep(self.__delay)
+        return True
 
     def gulosa(self) -> bool:
         # [INSERIR BUSCA GULOSA AQUI]
@@ -153,6 +173,21 @@ class Busca:
             for col in range(6):
                 if tabuleiro[lin][col] == 0:
                     return (lin, col)
+        # Quando mapeia tudo, retorna vazio.
+        return ()
+
+    def proxPos2(self, tabuleiro: list) -> tuple:
+        """Pega o próximo estado não mapeado da Direita pra Esquerda, Baixo para Cima.
+
+        :param tabuleiro: matriz que representa o tabuleiro
+        :type tabuleiro: list
+        :returns: próximo estado não usado ou vazio
+        :rtype: tuple
+        """
+        for lin in range(6):
+            for col in range(6):
+                if tabuleiro[5-lin][5-col] == 0:
+                    return (5-lin, 5-col)
         # Quando mapeia tudo, retorna vazio.
         return ()
 
