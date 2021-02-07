@@ -234,6 +234,20 @@ class Opcoes(GUIBase):
             )
         ]
 
+        self.__botoes.extend(
+            [
+                Botao(*i, tamanhoOpcoes, self.tela, 1)
+                for i in (
+                    (self.setStrat1, (), (-8, 4), "strat 1", 16, (30, 500)),
+                    (self.setStrat2, (), (-8, 4), "strat 2", 16, (110, 500))
+                )
+            ]
+        )
+        for botao in self.botoes:
+            if botao.label_botao == "strat 1":
+                botao.marked = True
+                break
+
     @property
     def botoes(self):
         """getBotoes()"""
@@ -267,6 +281,33 @@ class Opcoes(GUIBase):
         # update squares
         self.__busca.tabuleiro.update_campos()
         return True
+    
+    def setStrat1(self) -> bool:
+        if not self.__busca.e: 
+            self.mark(self.botoes[3])
+            self.__busca.proxPos = 1
+            return True
+        return False
+
+    def setStrat2(self) -> bool:
+        if not self.__busca.e: 
+            self.__busca.proxPos = 2
+            self.mark(self.botoes[4])
+            return True
+        return False
+    
+    def mark(self, b):
+        """Evento de marcação no clique
+
+        :param args: botao a ser marcado
+        :type args: Botao
+        """
+        for botao in self.botoes:
+            if botao == b:
+                pass
+            elif botao.grupo == b.grupo:
+                botao.marked = False
+        b.marked = True
 
     def desenhar(self):
         """Desenhar quadro de opções"""

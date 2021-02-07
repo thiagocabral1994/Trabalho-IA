@@ -18,13 +18,30 @@ class Busca:
     :param delay: tempo de delay (default = 0.0)
     :type delay: float
     """
-
     def __init__(self, tabuleiro=None, delay: float = 0.0):
         self.tabuleiro = tabuleiro
         self.__delay = delay / 1000
+        self.__proxPos = self.estrategia1
         self.__e = threading.Event()
         self.__kill = False
         self.__e.set()
+
+    @property
+    def proxPos(self) -> float:
+        """getProxPos()"""
+        return self.__proxPos
+
+    @proxPos.setter
+    def proxPos(self, proxPos):
+        """getProxPos(proxPos)
+
+        :param proxPos: função da estratégia de controle
+        :type delay: function
+        """
+        if proxPos == 1:
+            self.__proxPos = self.estrategia1
+        elif proxPos == 2:
+            self.__proxPos = self.estrategia2
 
     @property
     def delay(self) -> float:
@@ -150,6 +167,7 @@ class Busca:
                     self.tabuleiro.tabuleiro[pos[0]][pos[1]] = n
                     fila.put(copy.deepcopy(self.tabuleiro.tabuleiro))
                     time.sleep(self.__delay)
+        self.__e.clear()
 
     def gulosa(self) -> bool:
         # [INSERIR BUSCA GULOSA AQUI]
@@ -161,7 +179,7 @@ class Busca:
         print("Soon: Busca IDA*")
         pass
 
-    def proxPos(self, tabuleiro: list) -> tuple:
+    def estrategia1(self, tabuleiro: list) -> tuple:
         """Pega o próximo estado não mapeado da Esquerda pra Direita, Cima para Baixo.
 
         :param tabuleiro: matriz que representa o tabuleiro
@@ -176,7 +194,7 @@ class Busca:
         # Quando mapeia tudo, retorna vazio.
         return ()
 
-    def proxPos2(self, tabuleiro: list) -> tuple:
+    def estrategia2(self, tabuleiro: list) -> tuple:
         """Pega o próximo estado não mapeado da Direita pra Esquerda, Baixo para Cima.
 
         :param tabuleiro: matriz que representa o tabuleiro

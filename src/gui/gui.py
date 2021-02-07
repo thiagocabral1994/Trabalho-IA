@@ -91,8 +91,6 @@ class GUI:
         for b in self.__painel_lateral.opcoes.botoes:
             if p[0] in b.click_range[0] and p[1] in b.click_range[1]:
                 if b.label_botao == "random" or b.label_botao == "default":
-                    s = b.click((self.__tabuleiro_model,))
+                    b.click((self.__tabuleiro_model,))
                 else:
-                    s = b.click()
-        if not s:
-            print("Puzzle Impossível")
+                    b.click()
