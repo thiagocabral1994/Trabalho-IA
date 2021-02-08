@@ -1,3 +1,10 @@
+AUTORES:
+    Arthur Boechat Mazzi	
+    Daniel Augusto Machada Baeta
+    Matheus Franklin Rodrigues Silva
+    Thiago do Vale Cabral 
+
+
 IMPORTANTE: é necessário instalar o pygame para que esta aplicação rode:
 
     python3 -m pip install -U pygame --user
