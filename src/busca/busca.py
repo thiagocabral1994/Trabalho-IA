@@ -150,28 +150,43 @@ class Busca:
 
         :returns: True se solucionou e False se não tem solução
         """
+        passos = 0
+        # Declaração da Fila
         fila = queue.Queue()
+        # Insere na fila o estado inicial do tabuleiro
         fila.put(copy.deepcopy(self.tabuleiro.tabuleiro))
+        # Repete a busca até a fila esvaziar
         while not fila.empty():
+            # Verifica se o usuário interrompeu a busca no GUI
             if not self.__kill:
+                # Pega próximo elemento da fila
                 self.tabuleiro.setTabuleiro(fila.get())
+                # Pega o próximo estado seguindo a estratégia
+                # de controle
                 pos = self.proxPos(self.tabuleiro.tabuleiro)
-                # Verifica se é válido
+                # Caso não haja uma próxima posição, 
+                # seguir pro próximo da fila
                 if not pos:
                     continue
-                # Varre possíveis valores
+                # Varre possíveis do tabuleiro
                 for n in range(1, 7):
-                    # Verifica se existe
+                    # Verifica o valor não infringe a regra do jogo
                     if not self.existe(self.tabuleiro.tabuleiro, n, pos):
-                        # Seta valor
+                        # Escreve valor válido no tabuleiro
                         self.tabuleiro.setCampo(n, (pos[0], pos[1]))
                         self.tabuleiro.tabuleiro[pos[0]][pos[1]] = n
+                        # Adiciona cópia do tabuleiro na fila
                         fila.put(copy.deepcopy(self.tabuleiro.tabuleiro))
                         time.sleep(self.__delay)
+                        passos += 1
+            # Caso o usuário tenha interrompido a busca no GUI, 
+            # esvaziar fila
             else:
                 fila = queue.Queue()
                 break   
         self.__e.clear()
+        print(passos," estados")
+        
 
     def gulosa(self) -> bool:
         # [INSERIR BUSCA GULOSA AQUI]
