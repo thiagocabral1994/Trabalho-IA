@@ -1,0 +1,9 @@
+IMPORTANTE: é necessário instalar o pygame para que esta aplicação rode:
+
+    python3 -m pip install -U pygame --user
+
+Para compilar e rodar o código:
+
+    cd src
+    python3 main.py
+
