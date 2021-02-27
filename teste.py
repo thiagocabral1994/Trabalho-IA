@@ -1,4 +1,5 @@
 from queue import LifoQueue
+from queue import Queue
 from copy import deepcopy
 
 tabuleiro = [
@@ -109,10 +110,24 @@ def initListaLabels(tabuleiro: list) -> list:
                 fila.append(((i,j), labels[i][j]))
     return fila
 
+def proxPos(tabuleiro: list) -> tuple:
+        """Pega o próximo estado não mapeado da Esquerda pra Direita, Cima para Baixo.
+
+        :param tabuleiro: matriz que representa o tabuleiro
+        :type tabuleiro: list
+        :returns: próximo estado não usado ou vazio
+        :rtype: tuple
+        """
+        for lin in range(6):
+            for col in range(6):
+                if tabuleiro[lin][col] == 0:
+                    return (lin, col)
+        # Quando mapeia tudo, retorna vazio.
+        return ()
 
 def gulosa(tabuleiro: list) -> bool:
     passos = 0
-    # Declaração da Fila
+    # Declaração da pilha
     fila = LifoQueue()
     # Insere na fila o estado inicial do tabuleiro
     fila.put(deepcopy(tabuleiro))
@@ -146,4 +161,57 @@ def gulosa(tabuleiro: list) -> bool:
     printMatrix(tabuleiro)
     print(passos," estados")
 
-gulosa(tabuleiro)
+def _ida_estrela(tabuleiro: list, threshold: int) -> int:
+    novoThreshold = 1000 # trocar por infinito
+    passos = 0
+    # Declaração da pilha
+    fila = LifoQueue()
+    custo = 0
+    # Insere na fila o estado inicial do tabuleiro
+    fila.put((deepcopy(tabuleiro), custo))
+    # Repete a busca até a fila esvaziar
+    while not fila.empty():
+        # Verifica se o usuário interrompeu a busca no GUI
+        if not False: #Trocar self.__kill por False
+            # Pega próximo elemento da fila
+            proxEstado = fila.get()
+            custo = proxEstado[1]
+            tabuleiro = proxEstado[0]
+            filaLabel = initListaLabels(tabuleiro)
+            filaLabel.sort(key = checkLen)
+            # print(filaLabel)
+            # print()
+            if not filaLabel:
+                printMatrix(tabuleiro)
+                print(passos," estados")
+                return -1
+            # Pega o próximo estado seguindo a estratégia
+            # de controle
+            pos = (filaLabel[0])[0]
+            if len((filaLabel[0])[1]) + custo > threshold:
+                continue
+            # Varre possíveis do tabuleiro
+            for n in (filaLabel[0])[1]:
+                # Escreve valor válido no tabuleiro
+                tabuleiro[pos[0]][pos[1]] = n
+                # Adiciona cópia do tabuleiro na fila
+                fila.put((deepcopy(tabuleiro), custo+1))
+                passos += 1
+        # Caso o usuário tenha interrompido a busca no GUI, 
+        # esvaziar fila
+        else:
+            fila = LifoQueue()
+            break
+    printMatrix(tabuleiro)
+    print(passos," estados")
+    return novoThreshold
+
+def ida_estrela(tabuleiro: list) -> bool:
+    filaLabel = initListaLabels(tabuleiro)
+    filaLabel.sort(key = checkLen)
+    item = filaLabel[0]
+    threshold = len(item[1])
+    while threshold != -1:
+        threshold = _ida_estrela(tabuleiro, threshold)
+
+ida_estrela(tabuleiro)
