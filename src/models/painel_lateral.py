@@ -146,10 +146,10 @@ class AutoBusca(GUIBase):
 
     def parar(self):
         """Mata a busca a ser realizada"""
-        self.__busca.delay = 0
         self.__busca.kill = True
         self.__busca.e = False
         self.__threads.parar()
+        self.__busca.delay = 0
     
     def reiniciar(self) -> bool:
         """Limpa o tabuleiro para o último estado inicial gerado"""

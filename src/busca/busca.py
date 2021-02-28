@@ -8,6 +8,7 @@ import threading
 import time
 import queue
 import copy
+from math import inf
 
 class Busca:
 
@@ -19,6 +20,7 @@ class Busca:
     :type delay: float
     """
     def __init__(self, tabuleiro=None, delay: float = 0.0):
+        self.labels = {}
         self.tabuleiro = tabuleiro
         self.__delay = delay / 1000
         self.__proxPos = self.estrategia1
@@ -188,15 +190,103 @@ class Busca:
         print(passos," estados")
         
 
-    def gulosa(self) -> bool:
-        # [INSERIR BUSCA GULOSA AQUI]
-        print("Soon: Busca Gulosa")
-        pass
+    def gulosa(self):
+        passos = 0
+        # Declaração da pilha
+        pilha = queue.LifoQueue()
+        # Insere na fila o estado inicial do tabuleiro
+        pilha.put(copy.deepcopy(self.tabuleiro.tabuleiro))
+        # Repete a busca até a fila esvaziar
+        while not pilha.empty():
+            # Verifica se o usuário interrompeu a busca no GUI
+            if not self.__kill:
+                # Pega próximo elemento da fila
+                self.tabuleiro.setTabuleiro(pilha.get())
+                filaLabel = self.calculaLabels()
+                filaLabel.sort(key = self.checarNumLabels)
+                # print(filaLabel)
+                # print()
+                if not filaLabel:
+                    break
+                # Pega o próximo estado seguindo a estratégia
+                # de controle
+                pos = (filaLabel[0])[0]
+                # Varre possíveis do tabuleiro
+                for n in (filaLabel[0])[1]:
+                    # Escreve valor válido no tabuleiro
+                    self.tabuleiro.setCampo(n, (pos[0], pos[1]))
+                    self.tabuleiro.tabuleiro[pos[0]][pos[1]] = n
+                    # Adiciona cópia do tabuleiro na fila
+                    pilha.put(copy.deepcopy(self.tabuleiro.tabuleiro))
+                    time.sleep(self.__delay)
+                    passos += 1
+            # Caso o usuário tenha interrompido a busca no GUI, 
+            # esvaziar fila
+            else:
+                fila = queue.LifoQueue()
+                break
+        self.__e.clear()
+        print(passos," estados")
 
-    def ida_estrela(self) -> bool:
-        # [INSERIR BUSCA IDA* AQUI]
-        print("Soon: Busca IDA*")
-        pass
+    def _ida_estrela(self, tabuleiro: list, threshold: int) -> int:
+        self.tabuleiro.setTabuleiro(tabuleiro)
+        novoThreshold = inf
+        passos = 0
+        # Declaração da pilha
+        pilha = queue.LifoQueue()
+        custo = 0
+        # Insere na fila o estado inicial do tabuleiro
+        pilha.put((copy.deepcopy(self.tabuleiro.tabuleiro), custo))
+        # Repete a busca até a fila esvaziar
+        while not pilha.empty():
+            # Verifica se o usuário interrompeu a busca no GUI
+            if not self.__kill:
+                # Pega próximo elemento da fila
+                proxEstado = pilha.get()
+                custo = proxEstado[1]
+                self.tabuleiro.setTabuleiro(proxEstado[0])
+                filaLabel = self.calculaLabels()
+                if not filaLabel:
+                    print(passos," estados")
+                    self.__e.clear()
+                    return -1
+                # Pega o próximo estado seguindo a estratégia
+                # de controle
+                pos = self.proxPos(self.tabuleiro.tabuleiro)
+                candidatoThreshold = len(self.labels[pos]) + custo 
+                if candidatoThreshold > threshold:
+                    novoThreshold = candidatoThreshold if candidatoThreshold < novoThreshold else novoThreshold
+                    continue
+                elif not pos:
+                    continue
+
+                for n in range(1, 7):
+                    # Verifica o valor não infringe a regra do jogo
+                    if not self.existe(self.tabuleiro.tabuleiro, n, pos):
+                        # Escreve valor válido no tabuleiro
+                        self.tabuleiro.setCampo(n, (pos[0], pos[1]))
+                        self.tabuleiro.tabuleiro[pos[0]][pos[1]] = n
+                        # Adiciona cópia do tabuleiro na fila
+                        pilha.put((copy.deepcopy(self.tabuleiro.tabuleiro), custo+1))
+                        time.sleep(self.__delay)
+                        passos += 1
+            # Caso o usuário tenha interrompido a busca no GUI, 
+            # esvaziar fila
+            else:
+                fila = queue.LifoQueue()
+                break
+        print(passos," estados")
+        self.__e.clear()
+        return novoThreshold
+
+    def ida_estrela(self):
+        tabuleiro = self.tabuleiro.tabuleiro
+        filaLabel = self.calculaLabels()
+        filaLabel.sort(key = self.checarNumLabels)
+        item = filaLabel[0]
+        threshold = len(item[1])
+        while threshold != -1 and not self.__kill:
+            threshold = self._ida_estrela(tabuleiro, threshold)
 
     def estrategia1(self, tabuleiro: list) -> tuple:
         """Pega o próximo estado não mapeado da Esquerda pra Direita, Cima para Baixo.
@@ -228,6 +318,42 @@ class Busca:
         # Quando mapeia tudo, retorna vazio.
         return ()
 
+    def calculaLabels(self) -> list:
+        labels = [
+                [[],[],[],[],[],[]],
+                [[],[],[],[],[],[]],
+                [[],[],[],[],[],[]],
+                [[],[],[],[],[],[]],
+                [[],[],[],[],[],[]],
+                [[],[],[],[],[],[]]
+            ]
+        # Inicializando a matriz de label
+        fila = []
+        for i in range(6):
+            for j in range(6):
+                lin = i if self.__proxPos == self.estrategia1 else 5-i
+                col = j if self.__proxPos == self.estrategia1 else 5-j
+                if self.tabuleiro.tabuleiro[lin][col] != 0:
+                    labels[lin][col] = []
+                else:
+                    for value in range(1,7):
+                        if self.existe(self.tabuleiro.tabuleiro, value, (lin,col)) == ():
+                            labels[lin][col].append(value)
+                    fila.append(((lin,col), labels[lin][col]))
+                    self.labels[(lin,col)] = labels[lin][col]
+        return fila
+
+
+    def checarNumLabels(self, slot: tuple) -> int:
+        """Checa quantidade de labels em um slot.
+
+        :param tabuleiro: coordenada no tabuleiro
+        :type tabuleiro: tuple
+        :returns: quantidade de labels em um slot
+        :rtype: int
+        """
+        return len(slot[1])
+    
     def existe(self, tabuleiro: list, n: int, lin_col: tuple) -> tuple:
         """Valida se o atual estado respeita a regra do Lógica Grega
 
