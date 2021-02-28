@@ -153,36 +153,24 @@ class Busca:
         :returns: True se solucionou e False se não tem solução
         """
         passos = 0
-        # Declaração da Fila
         fila = queue.Queue()
-        # Insere na fila o estado inicial do tabuleiro
         fila.put(copy.deepcopy(self.tabuleiro.tabuleiro))
-        # Repete a busca até a fila esvaziar
         while not fila.empty():
-            # Verifica se o usuário interrompeu a busca no GUI
             if not self.__kill:
-                # Pega próximo elemento da fila
                 self.tabuleiro.setTabuleiro(fila.get())
-                # Pega o próximo estado seguindo a estratégia
-                # de controle
-                pos = self.proxPos(self.tabuleiro.tabuleiro)
-                # Caso não haja uma próxima posição, 
-                # seguir pro próximo da fila
-                if not pos:
+                filaLabel = self.calculaLabels()
+                if not filaLabel:
                     continue
-                # Varre possíveis do tabuleiro
-                for n in range(1, 7):
-                    # Verifica o valor não infringe a regra do jogo
-                    if not self.existe(self.tabuleiro.tabuleiro, n, pos):
-                        # Escreve valor válido no tabuleiro
+                for slot in filaLabel:
+                    pos = slot[0]
+                    for n in slot[1]:
                         self.tabuleiro.setCampo(n, (pos[0], pos[1]))
                         self.tabuleiro.tabuleiro[pos[0]][pos[1]] = n
-                        # Adiciona cópia do tabuleiro na fila
                         fila.put(copy.deepcopy(self.tabuleiro.tabuleiro))
                         time.sleep(self.__delay)
                         passos += 1
-            # Caso o usuário tenha interrompido a busca no GUI, 
-            # esvaziar fila
+                    self.tabuleiro.setCampo(0, (pos[0], pos[1]))
+                    self.tabuleiro.tabuleiro[pos[0]][pos[1]] = 0
             else:
                 fila = queue.Queue()
                 break   
@@ -192,36 +180,22 @@ class Busca:
 
     def gulosa(self):
         passos = 0
-        # Declaração da pilha
         pilha = queue.LifoQueue()
-        # Insere na fila o estado inicial do tabuleiro
         pilha.put(copy.deepcopy(self.tabuleiro.tabuleiro))
-        # Repete a busca até a fila esvaziar
         while not pilha.empty():
-            # Verifica se o usuário interrompeu a busca no GUI
             if not self.__kill:
-                # Pega próximo elemento da fila
                 self.tabuleiro.setTabuleiro(pilha.get())
                 filaLabel = self.calculaLabels()
                 filaLabel.sort(key = self.checarNumLabels)
-                # print(filaLabel)
-                # print()
                 if not filaLabel:
                     break
-                # Pega o próximo estado seguindo a estratégia
-                # de controle
                 pos = (filaLabel[0])[0]
-                # Varre possíveis do tabuleiro
                 for n in (filaLabel[0])[1]:
-                    # Escreve valor válido no tabuleiro
                     self.tabuleiro.setCampo(n, (pos[0], pos[1]))
                     self.tabuleiro.tabuleiro[pos[0]][pos[1]] = n
-                    # Adiciona cópia do tabuleiro na fila
                     pilha.put(copy.deepcopy(self.tabuleiro.tabuleiro))
                     time.sleep(self.__delay)
                     passos += 1
-            # Caso o usuário tenha interrompido a busca no GUI, 
-            # esvaziar fila
             else:
                 fila = queue.LifoQueue()
                 break
@@ -232,16 +206,11 @@ class Busca:
         self.tabuleiro.setTabuleiro(tabuleiro)
         novoThreshold = inf
         passos = 0
-        # Declaração da pilha
         pilha = queue.LifoQueue()
         custo = 0
-        # Insere na fila o estado inicial do tabuleiro
         pilha.put((copy.deepcopy(self.tabuleiro.tabuleiro), custo))
-        # Repete a busca até a fila esvaziar
         while not pilha.empty():
-            # Verifica se o usuário interrompeu a busca no GUI
             if not self.__kill:
-                # Pega próximo elemento da fila
                 proxEstado = pilha.get()
                 custo = proxEstado[1]
                 self.tabuleiro.setTabuleiro(proxEstado[0])
@@ -250,28 +219,22 @@ class Busca:
                     print(passos," estados")
                     self.__e.clear()
                     return -1
-                # Pega o próximo estado seguindo a estratégia
-                # de controle
-                pos = self.proxPos(self.tabuleiro.tabuleiro)
-                candidatoThreshold = len(self.labels[pos]) + custo 
-                if candidatoThreshold > threshold:
-                    novoThreshold = candidatoThreshold if candidatoThreshold < novoThreshold else novoThreshold
-                    continue
-                elif not pos:
-                    continue
+                for slot in filaLabel:
+                    pos = slot[0]
+                    candidatoThreshold = len(self.labels[pos]) + custo 
+                    if candidatoThreshold > threshold:
+                        novoThreshold = candidatoThreshold if candidatoThreshold < novoThreshold else novoThreshold
+                        continue
 
-                for n in range(1, 7):
-                    # Verifica o valor não infringe a regra do jogo
-                    if not self.existe(self.tabuleiro.tabuleiro, n, pos):
-                        # Escreve valor válido no tabuleiro
-                        self.tabuleiro.setCampo(n, (pos[0], pos[1]))
-                        self.tabuleiro.tabuleiro[pos[0]][pos[1]] = n
-                        # Adiciona cópia do tabuleiro na fila
-                        pilha.put((copy.deepcopy(self.tabuleiro.tabuleiro), custo+1))
-                        time.sleep(self.__delay)
-                        passos += 1
-            # Caso o usuário tenha interrompido a busca no GUI, 
-            # esvaziar fila
+                    for n in range(1, 7):
+                        if not self.existe(self.tabuleiro.tabuleiro, n, pos):
+                            self.tabuleiro.setCampo(n, (pos[0], pos[1]))
+                            self.tabuleiro.tabuleiro[pos[0]][pos[1]] = n
+                            pilha.put((copy.deepcopy(self.tabuleiro.tabuleiro), custo+1))
+                            time.sleep(self.__delay)
+                            passos += 1
+                    self.tabuleiro.setCampo(0, (pos[0], pos[1]))
+                    self.tabuleiro.tabuleiro[pos[0]][pos[1]] = 0
             else:
                 fila = queue.LifoQueue()
                 break
