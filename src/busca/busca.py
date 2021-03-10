@@ -226,13 +226,12 @@ class Busca:
                         novoThreshold = candidatoThreshold if candidatoThreshold < novoThreshold else novoThreshold
                         continue
 
-                    for n in range(1, 7):
-                        if not self.existe(self.tabuleiro.tabuleiro, n, pos):
-                            self.tabuleiro.setCampo(n, (pos[0], pos[1]))
-                            self.tabuleiro.tabuleiro[pos[0]][pos[1]] = n
-                            pilha.put((copy.deepcopy(self.tabuleiro.tabuleiro), custo+1))
-                            time.sleep(self.__delay)
-                            passos += 1
+                    for n in self.labels[pos]:
+                        self.tabuleiro.setCampo(n, (pos[0], pos[1]))
+                        self.tabuleiro.tabuleiro[pos[0]][pos[1]] = n
+                        pilha.put((copy.deepcopy(self.tabuleiro.tabuleiro), custo+1))
+                        time.sleep(self.__delay)
+                        passos += 1
                     self.tabuleiro.setCampo(0, (pos[0], pos[1]))
                     self.tabuleiro.tabuleiro[pos[0]][pos[1]] = 0
             else:
